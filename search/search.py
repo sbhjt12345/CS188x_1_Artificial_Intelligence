@@ -132,8 +132,6 @@ def uniformCostSearch(problem):
     "*** YOUR CODE HERE ***"
     
     pq = util.PriorityQueue()
-    lowest = -1
-    res = []
     explored = []
     pq.push((problem.getStartState(),[]),0)   #starter state and actions taken
     while not pq.isEmpty():
@@ -141,15 +139,13 @@ def uniformCostSearch(problem):
         if curState in explored:
             continue
         elif (problem.isGoalState(curState)):
-            curCost = problem.getCostOfActions(curAction)
-            if (lowest==-1 or (lowest != -1 and lowest>curCost)):
-                res = curAction
+            return curAction
         explored.append(curState)
         for successor,action,stepCost in problem.getSuccessors(curState):
             newAction = curAction+[action]
             newCost = problem.getCostOfActions(newAction)
             pq.push((successor,newAction),newCost)
-    return res
+    print('Fail')
         
             
             
@@ -167,7 +163,23 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    
+    pq = util.PriorityQueue()
+    explored = []
+    pq.push((problem.getStartState(),[]),heuristic(problem.getStartState(),problem))
+    
+    while not pq.isEmpty():
+        curState,curAction = pq.pop()
+        if curState in explored:
+            continue
+        elif (problem.isGoalState(curState)):
+            return curAction
+        explored.append(curState)
+        for successor,action,stepCost in problem.getSuccessors(curState):
+            newAction = curAction+[action]
+            hcost = heuristic(successor,problem) + problem.getCostOfActions(newAction)
+            pq.push((successor,newAction),hcost)
+    print('Fail')
 
 
 # Abbreviations
