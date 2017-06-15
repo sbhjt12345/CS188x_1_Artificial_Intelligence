@@ -111,12 +111,51 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    
+    queue = util.Queue()
+    explored = []
+    queue.push((problem.getStartState(),[]))
+    while not queue.isEmpty():
+        curState, curAction = queue.pop()
+        if curState in explored:
+            continue
+        elif problem.isGoalState(curState):
+            return curAction
+        explored.append(curState)
+        for successor,action,stepCost in problem.getSuccessors(curState):
+            queue.push((successor,curAction+[action]))
+    print('Fail')
+    
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    
+    pq = util.PriorityQueue()
+    lowest = -1
+    res = []
+    explored = []
+    pq.push((problem.getStartState(),[]),0)   #starter state and actions taken
+    while not pq.isEmpty():
+        curState, curAction = pq.pop()        # get the item with lowest cost
+        if curState in explored:
+            continue
+        elif (problem.isGoalState(curState)):
+            curCost = problem.getCostOfActions(curAction)
+            if (lowest==-1 or (lowest != -1 and lowest>curCost)):
+                res = curAction
+        explored.append(curState)
+        for successor,action,stepCost in problem.getSuccessors(curState):
+            newAction = curAction+[action]
+            newCost = problem.getCostOfActions(newAction)
+            pq.push((successor,newAction),newCost)
+    return res
+        
+            
+            
+                
+        
+    
 
 def nullHeuristic(state, problem=None):
     """
