@@ -366,7 +366,24 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    curState = state[0]
+    exploredCorners = state[1]
+    unexploredCorners = []
+
+    for corner in corners:
+        if corner not in exploredCorners:
+            unexploredCorners.append(corner)
+    res = 0
+    #heuristic function is the cost of the cheapest path from node n to goal h(n)
+    #state : a tuple, coordinate of the current state first, and visitedcornerslist second
+    while len(unexploredCorners)>0:
+        distance,corner = min(
+            [(util.manhattanDistance(curState,corner),corner) for corner in unexploredCorners])
+        res += distance
+        curState = corner
+        unexploredCorners.remove(corner)
+    return res
+
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -460,7 +477,13 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    foodList = foodGrid.asList()
+    startState = problem.startingGameState
+    res = 0
+    if foodList:
+        res = max([mazeDistance(position,food,startState) for food in foodList])
+
+    return res
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -491,7 +514,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.breadthFirstSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -527,7 +550,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return state in self.food.asList()
 
 def mazeDistance(point1, point2, gameState):
     """
