@@ -15,8 +15,8 @@
       <file leaf-file-name="multiAgents.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/multiAgents.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="557">
-              <caret line="240" column="3" lean-forward="true" selection-start-line="240" selection-start-column="3" selection-end-line="240" selection-end-column="3" />
+            <state relative-caret-position="344">
+              <caret line="300" column="67" lean-forward="true" selection-start-line="300" selection-start-column="67" selection-end-line="300" selection-end-column="67" />
               <folding>
                 <element signature="e#660#694#0" expanded="true" />
               </folding>
@@ -48,6 +48,25 @@
     <option name="y" value="43" />
     <option name="width" value="1260" />
     <option name="height" value="692" />
+  </component>
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+          <State>
+            <id>Python</id>
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>PyTypeCheckerInspection</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -202,8 +221,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/multiAgents.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="557">
-          <caret line="240" column="3" lean-forward="true" selection-start-line="240" selection-start-column="3" selection-end-line="240" selection-end-column="3" />
+        <state relative-caret-position="344">
+          <caret line="300" column="67" lean-forward="true" selection-start-line="300" selection-start-column="67" selection-end-line="300" selection-end-column="67" />
           <folding>
             <element signature="e#660#694#0" expanded="true" />
           </folding>
