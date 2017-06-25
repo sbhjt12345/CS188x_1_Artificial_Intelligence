@@ -201,7 +201,54 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def ABmax(state,a,b,depth):
+            if state.isWin() or state.isLose() or depth<1:
+                return self.evaluationFunction(state)
+            value = float("-inf")
+            actionList = state.getLegalActions(0)  #agent 0 is the only guy who like to max
+            for action in actionList:
+                nextState = state.generateSuccessor(0,action)
+                nextValue = ABmin(nextState,a,b,depth,1)
+                if nextValue > value:
+                    value = nextValue
+                    if value > b:
+                        return value
+                    else:
+                        a = value if value > a else a
+            return value
+
+        def ABmin(state,a,b,depth,agent):
+            if state.isLose() or state.isWin():
+                return self.evaluationFunction(state)
+            value = float("inf")
+            actionList = state.getLegalActions(agent)
+            for action in actionList:
+                nextState = state.generateSuccessor(agent,action)
+                if agent == gameState.getNumAgents()-1:
+                    nextValue = ABmax(nextState,a,b,depth-1)
+                else:
+                    nextValue = ABmin(nextState,a,b,depth,agent+1)
+                if (nextValue < value):
+                    value = nextValue
+                if value < a:
+                    return value
+                else:
+                    b = value if value < b else b
+            return value
+
+        alpha = float("-inf")
+        beta = float("inf")
+        bestAction = None
+        maxV = float("-inf")     #the first move from root, we need max
+        actions = gameState.getLegalActions(0)
+        for action in actions:
+            successorState = gameState.generateSuccessor(0,action)
+            nextValue = ABmin(successorState,alpha,beta,self.depth,1)
+            if nextValue > maxV:
+                maxV = nextValue
+                bestAction = action
+            alpha = max(alpha,maxV)
+        return bestAction
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
