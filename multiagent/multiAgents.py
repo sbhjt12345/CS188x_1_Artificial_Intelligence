@@ -305,18 +305,107 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 bestAction = action
         return bestAction
 
-
-
-
 def betterEvaluationFunction(currentGameState):
     """
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
-
-      DESCRIPTION: <write something here so we know what you did>
+      DESCRIPTION: Since Q5 using expectimax agent upon evaluationFunction(ghost act randomly), 
+      It is reasonable to assume that the ghost acts randomly :)
+      Also, the action of pacman looked like that the expectimax agent has been limited to a given depth - important info.
+      If we do not consider the depth of the searching tree effect - an action queue of (stop, west) would be treat as the same to (west, stop)
+      Thus we cannot stop pacman from stay on one state -- waiting ghost to chase it so that it can move :) WTF
+      The way to solve this problem of "Un-preference" -- is to intro some add-in credit to let pacman move.
+      First, we aboslutely need to consider the ghost coz eating the scared ghost would get 200 points of reward. 
+      Always avoiding from meet with ghost leads usually lead to a score < 1000
+      Then capsule would be appreciate while a ghost is getting near to pacman and if the ghost is not scared, 
+      having capsules uneaten is bad, so info of capsule is introduced. 
+      If the ghost is scared, being close to it is good, and there is no extra bonus (beyond the gameState.getScore() bump for eating a
+      food) for being close to a food. In fact, discounting the game state food-eating bump/distance travelled decrement is 
+      a good idea so that pacman is sufficiently motivated to chase after the ghost :)
+      
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    if currentGameState.isWin() or currentGameState.isLose():
+        return currentGameState.getScore()
+
+    " Variables List"
+    position = currentGameState.getPacmanPosition()
+    
+    capsules = currentGameState.getCapsules()
+    numCapsules = len(capsules)
+    
+    walls = currentGameState.getWalls()
+    
+    ghostStates = currentGameState.getGhostStates()
+    ghostDistance = []
+    
+    foodList = currentGameState.getFood().asList()
+    foodDist, numFood = nearestItem(position, foodList, walls)
+    
+    capsuleDistance = 0
+    capsuleCounter = 0
+    
+    nearestGhostDistance = 0
+    ghostDistFeature = 0
+    
+    foodDistance = 1.0 / foodDist
+    score = currentGameState.getScore()
+
+    " Feature Weight List "
+    capsuleDistWeight = 3
+    capsuleCountWeight = 20
+    ghostDistWeight = 40
+    foodDistWeight = 0.25
+    scoreWeight = 1.0
+
+    for ghost in ghostStates:
+        ghostDistance.append(((int((ghost.getPosition()[0])),int((ghost.getPosition()[1]))), 
+                                manhattanDistance(position, ghost.getPosition()), ghost.scaredTimer)
+                            )
+
+    if len(ghostDistance) > 0:
+        nearestGhost = min(ghostDistance, key=itemgetter(1))
+        nearestGhostDistance = nearestGhost[1]
+    else: 
+        nearestGhostDistance = 100000
+
+    if nearestGhost[2]:
+        ghostDistFeature = 1.0 / nearestGhostDistance
+        foodDistWeight = 0
+        scoreWeight = 0.99
+    elif numCapsules:
+        capsuleCounter = -1
+        capsuleDist, _ = nearestItem(position, capsules, walls)
+        capsuleDistance = 1.0 / capsuleDist
+
+    utilityScore = (scoreWeight * score +
+                    capsuleDistWeight * capsuleDistance +
+                    capsuleCountWeight * capsuleCounter +
+                    ghostDistWeight * ghostDistFeature +
+                    foodDistWeight * foodDistance)
+    return utilityScore
+
+def nearestItem(position, items, walls):
+    if not items:
+        return 0, None
+    closed = set()
+    fringe = util.Queue()
+    fringe.push((position, 0))
+    while not fringe.isEmpty():
+        (x, y), cost = fringe.pop()
+        if (x, y) in items:
+            return cost, (x, y)
+        if (x, y) in closed:
+            continue
+        closed.add((x, y))
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        for (nx, ny) in [(x+dx, y+dy) for dx, dy in directions if not walls[x+dx][y+dy]]:
+            fringe.push(((nx, ny), cost+1))
+    return 0, None
+
+# Abbreviation
+better = betterEvaluationFunction
 
 # Abbreviation
 better = betterEvaluationFunction
