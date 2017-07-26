@@ -86,7 +86,21 @@ class QLearningAgent(ReinforcementAgent):
           you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        actionList = self.getLegalActions(state)
+        if len(actionList) == 0:
+            return None
+        res = []
+        maxQ = float("-inf")
+        for action in actionList:
+            tmpQ = self.getQValue(state,action)
+            if tmpQ == maxQ:
+                res.append(action)
+            elif tmpQ > maxQ:
+                maxQ = tmpQ
+                res = [action]
+        return random.choice(res)
+
+
 
     def getAction(self, state):
         """
@@ -103,7 +117,12 @@ class QLearningAgent(ReinforcementAgent):
         legalActions = self.getLegalActions(state)
         action = None
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if len(legalActions)==0:
+            return None
+        if util.flipCoin(self.epsilon):
+            return random.choice(legalActions)
+        else:
+            return self.computeActionFromQValues(state)
 
         return action
 
@@ -117,7 +136,9 @@ class QLearningAgent(ReinforcementAgent):
           it will be called on your behalf
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        Qval = self.getQValue(state,action)
+        sample = reward + self.discount * self.computeValueFromQValues(nextState)
+        self.values[(state,action)] = (1-self.alpha) * Qval + self.alpha * sample
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
@@ -180,14 +201,23 @@ class ApproximateQAgent(PacmanQAgent):
           where * is the dotProduct operator
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        features = self.featExtractor.getFeatures(state, action)
+        weights = self.getWeights()
+        return features * weights
+
 
     def update(self, state, action, nextState, reward):
         """
            Should update your weights based on transition
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        weights = self.getWeights()
+        features = self.featExtractor.getFeatures(state, action)
+
+        difference = (reward + self.discount * self.getValue(nextState)) - self.getQValue(state, action)
+
+        for i in features:
+            weights[i] += self.alpha * difference * features[i]
 
     def final(self, state):
         "Called at the end of each game."
