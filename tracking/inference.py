@@ -267,6 +267,18 @@ class ParticleFilter(InferenceModule):
         weight with each position) is incorrect and may produce errors.
         """
         "*** YOUR CODE HERE ***"
+        #Implement the functions initializeUniformly,
+        #getBeliefDistribution, and observe for the ParticleFilter class in inference.py
+
+        self.posParticles = []
+        i = 0
+        while i<self.numParticles:
+            for p in self.legalPositions:
+                if i>=self.numParticles: break
+                self.posParticles.append(p)
+                i+=1
+        return self.posParticles
+
 
     def observe(self, observation, gameState):
         """
@@ -299,7 +311,37 @@ class ParticleFilter(InferenceModule):
         emissionModel = busters.getObservationDistribution(noisyDistance)
         pacmanPosition = gameState.getPacmanPosition()
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        allPossible = util.Counter()
+
+        if noisyDistance is None:
+            for i in range(self.numParticles):
+                self.posParticles[i] = self.getJailPosition()
+            return
+
+        curBeliefs = self.getBeliefDistribution()
+        for p in self.legalPositions:
+            trueDistance = util.manhattanDistance(pacmanPosition,p)
+            if emissionModel[trueDistance]>0:
+                allPossible[p] += emissionModel[trueDistance] * curBeliefs[p]
+
+        #allPossible.normalize()
+        allZero = True
+        for i in allPossible.values():
+            if i != 0:
+                allZero = False
+                break
+
+        if allZero:
+            self.initializeUniformly(gameState)
+        else:
+            self.posParticles = []
+            for i in range(self.numParticles):
+                self.posParticles.append(util.sample(allPossible))
+
+
+
+
+
 
     def elapseTime(self, gameState):
         """
@@ -326,7 +368,12 @@ class ParticleFilter(InferenceModule):
         Counter object)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        resultBelief = util.Counter()
+        for i in self.posParticles:
+            resultBelief[i] += 1.0
+        resultBelief.normalize()
+        return resultBelief
+        
 
 class MarginalInference(InferenceModule):
     """
