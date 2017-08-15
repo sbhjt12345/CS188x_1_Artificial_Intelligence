@@ -358,7 +358,15 @@ class ParticleFilter(InferenceModule):
         a belief distribution.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #curBeliefs = self.getBeliefDistribution()
+        newPoss = []
+        for p in self.posParticles:
+            newPosDist = self.getPositionDistribution(self.setGhostPosition(gameState, p))
+            newPoss.append(util.sample(newPosDist))
+        self.posParticles = newPoss
+
+
+
 
     def getBeliefDistribution(self):
         """
@@ -446,6 +454,16 @@ class JointParticleFilter:
         weight with each position) is incorrect and may produce errors.
         """
         "*** YOUR CODE HERE ***"
+        self.particleTuplePos = []
+        allTuples = list(itertools.product(self.legalPositions, repeat = self.numGhosts))
+        i = 0
+        while i < self.numParticles:
+            for p in allTuples:
+                if i >= self.numParticles: break
+                self.particleTuplePos.append(p)
+                i += 1
+
+
 
     def addGhostAgent(self, agent):
         """
@@ -487,12 +505,48 @@ class JointParticleFilter:
         operation when placing a ghost in jail.
         """
         pacmanPosition = gameState.getPacmanPosition()
-        noisyDistances = gameState.getNoisyGhostDistances()
+        noisyDistances = gameState.getNoisyGhostDistances()   #noisyDistance for every ghost
         if len(noisyDistances) < self.numGhosts:
             return
         emissionModels = [busters.getObservationDistribution(dist) for dist in noisyDistances]
+        # a collection of emissionModel for every ghost
 
         "*** YOUR CODE HERE ***"
+        allPossible = util.Counter()
+        #what we have to do is to apply the single observe function to every ghost now
+        for par in self.particleTuplePos:    
+            # now we have a tuple of ghost positions
+            prob = 1.0
+            #copy = par
+            for i in range(self.numGhosts):
+                if noisyDistances[i] is None:        
+                    par = self.getParticleWithGhostInJail(par,i)
+                else:
+                    trueDistance = util.manhattanDistance(par[i],pacmanPosition)
+                    #why we cant do in old way: all ghost position is connected 
+                    #when we talking about the position distribution of a single ghost
+                    #we have to think about how it would affect other ghosts
+                    # emissionModels[i] is the emissionModel for a specific ghost
+                    # emissionModels[i][trueDistance] gets the prob
+                    # what's next???? what if it's zero? how would it affect the particle?
+                    # if it's zero, it means the position never would be the pos of the ghost
+                    # which means the particle (the distribution of all ghosts) is impossible
+                    # the concept is totally different comparing to the last single particle filtering problem
+                    prob *= emissionModels[i][trueDistance]
+            allPossible[par] += prob
+        allPossible.normalize()
+        value = 0
+        for v in allPossible.values():
+            value += v
+        if value == 0:
+            self.initializeParticles()
+        else:
+            self.particleTuplePos = []
+            for i in range(self.numParticles):
+                self.particleTuplePos.append(util.sample(allPossible))
+
+
+
 
     def getParticleWithGhostInJail(self, particle, ghostIndex):
         """
@@ -560,7 +614,12 @@ class JointParticleFilter:
 
     def getBeliefDistribution(self):
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        newBeliefs = util.Counter()
+        for i in self.particleTuplePos:
+            newBeliefs[i] += 1.0
+        newBeliefs.normalize()
+        return newBeliefs
+
 
 # One JointInference module is shared globally across instances of MarginalInference
 jointInference = JointParticleFilter()
